@@ -1,0 +1,12 @@
+timestamp,storageAmount,capacity,percentFull,status
+0,7500,10000,75.0,normal
+1,7350,10000,73.5,normal
+2,7200,10000,72.0,normal
+3,7000,10000,70.0,normal
+4,6500,10000,65.0,warning
+5,6000,10000,60.0,warning
+6,5500,10000,55.0,warning
+7,5000,10000,50.0,critical
+8,5500,10000,55.0,warning
+9,6200,10000,62.0,warning
+10,7000,10000,70.0,normal

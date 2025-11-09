@@ -1,0 +1,16 @@
+timestamp,flowRate,isRunning,pressure,status
+0,45.5,true,2.3,normal
+1,46.2,true,2.4,normal
+2,47.1,true,2.5,normal
+3,45.8,true,2.3,normal
+4,44.2,true,2.2,normal
+5,43.5,true,2.1,warning
+6,42.1,true,2.0,warning
+7,39.0,true,1.9,warning
+8,28.5,true,1.7,critical
+9,35.0,true,1.8,warning
+10,42.0,true,2.0,warning
+11,45.0,true,2.3,normal
+12,46.5,true,2.4,normal
+13,47.2,true,2.5,normal
+14,45.9,true,2.3,normal

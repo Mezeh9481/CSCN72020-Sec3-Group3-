@@ -1,0 +1,11 @@
+timestamp,filterPressure,flowRate,efficiency,isRunning,status
+0,1.2,85.5,94.2,true,normal
+1,1.3,86.1,94.5,true,normal
+2,1.4,84.8,93.8,true,normal
+3,1.5,83.2,92.5,true,warning
+4,1.6,82.1,91.2,true,warning
+5,1.7,81.0,90.0,true,warning
+6,1.8,80.2,89.2,true,critical
+7,1.5,83.5,92.5,true,warning
+8,1.3,85.0,94.0,true,normal
+9,1.2,86.0,94.5,true,normal

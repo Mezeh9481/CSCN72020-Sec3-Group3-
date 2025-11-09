@@ -1,0 +1,16 @@
+timestamp,coagulationLevel,status
+0,92.5,normal
+1,91.8,normal
+2,90.2,normal
+3,88.5,normal
+4,85.0,normal
+5,82.3,warning
+6,78.5,warning
+7,75.2,warning
+8,58.5,critical
+9,65.0,warning
+10,72.5,warning
+11,80.0,warning
+12,86.5,normal
+13,91.0,normal
+14,93.5,normal

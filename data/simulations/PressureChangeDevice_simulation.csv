@@ -1,0 +1,11 @@
+timestamp,pressure,targetPressure,isRunning,status
+0,2.3,2.5,true,normal
+1,2.4,2.5,true,normal
+2,2.5,2.5,true,normal
+3,2.8,2.5,true,warning
+4,3.1,2.5,true,critical
+5,2.9,2.5,true,warning
+6,2.6,2.5,true,normal
+7,2.4,2.5,true,normal
+8,2.3,2.5,true,normal
+9,2.5,2.5,true,normal

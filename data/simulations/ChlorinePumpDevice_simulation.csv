@@ -1,0 +1,12 @@
+timestamp,chlorineLevel,dosingRate,isRunning,status
+0,2.1,0.5,true,normal
+1,2.2,0.5,true,normal
+2,2.3,0.5,true,normal
+3,2.2,0.5,true,normal
+4,1.8,0.7,true,warning
+5,1.6,0.9,true,warning
+6,1.4,1.0,true,critical
+7,1.7,0.8,true,warning
+8,2.0,0.6,true,normal
+9,2.1,0.5,true,normal
+10,2.2,0.5,true,normal

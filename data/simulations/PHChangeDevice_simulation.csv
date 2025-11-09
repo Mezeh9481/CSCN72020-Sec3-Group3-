@@ -1,0 +1,11 @@
+timestamp,phValue,targetPH,isAdjusting,status
+0,7.2,7.0,false,normal
+1,7.3,7.0,false,normal
+2,7.1,7.0,false,normal
+3,8.6,7.0,true,warning
+4,8.9,7.0,true,critical
+5,8.2,7.0,true,warning
+6,7.5,7.0,true,normal
+7,7.2,7.0,false,normal
+8,7.0,7.0,false,normal
+9,7.1,7.0,false,normal

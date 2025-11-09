@@ -1,0 +1,11 @@
+timestamp,temperature,targetTemp,isHeating,status
+0,18.5,20.0,true,normal
+1,19.2,20.0,true,normal
+2,20.1,20.0,false,normal
+3,21.5,20.0,false,warning
+4,22.8,20.0,false,warning
+5,21.2,20.0,false,warning
+6,20.0,20.0,false,normal
+7,19.5,20.0,true,normal
+8,18.9,20.0,true,normal
+9,20.0,20.0,false,normal

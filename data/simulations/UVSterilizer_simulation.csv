@@ -1,0 +1,11 @@
+timestamp,uvIntensity,lampStatus,isActive,status
+0,85.2,good,true,normal
+1,86.1,good,true,normal
+2,85.5,good,true,normal
+3,82.3,degraded,true,warning
+4,78.1,degraded,true,warning
+5,72.5,poor,true,critical
+6,75.0,degraded,true,warning
+7,80.0,degraded,true,warning
+8,84.0,good,true,normal
+9,85.8,good,true,normal
