@@ -5,9 +5,7 @@ using WaterTreatmentSCADA.Core.Utilities;
 
 namespace WaterTreatmentSCADA.Core.Base
 {
-    /// <summary>
-    /// Abstract base class for all devices
-    /// </summary>
+    // Base class for all devices - sensors and controllable devices inherit from this
     public abstract class BaseDevice : IDevice
     {
         public string Name { get; protected set; }
@@ -25,13 +23,15 @@ namespace WaterTreatmentSCADA.Core.Base
             Status = DeviceStatus.Offline;
             isRunning = false;
             
+            // Create file simulator if path provided
             if (!string.IsNullOrEmpty(simulationFilePath))
             {
                 fileSimulator = new BinaryIO(simulationFilePath);
             }
         }
         
-        protected string GetFileInfo()
+        // Read one line from simulation file (loops when EOF reached)
+        protected string? GetFileInfo()
         {
             if (fileSimulator != null && !fileSimulator.IsEndOfFile)
             {
@@ -63,7 +63,10 @@ namespace WaterTreatmentSCADA.Core.Base
             Status = DeviceStatus.Offline;
         }
         
+        // Update device state - called every 1 second by DeviceManager
         public abstract void Update();
+        
+        // Get device telemetry data for monitoring/debugging
         public abstract Dictionary<string, object> GetTelemetryData();
     }
 }

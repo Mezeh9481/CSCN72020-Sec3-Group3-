@@ -3,9 +3,7 @@ using WaterTreatmentSCADA.Core.Interfaces;
 
 namespace WaterTreatmentSCADA.Core.Base
 {
-    /// <summary>
-    /// Base class for devices that can be controlled by operators
-    /// </summary>
+    // Base class for devices that can be controlled (pumps, valves, etc.)
     public abstract class ControllableDevice : BaseDevice
     {
         public bool IsRunning => isRunning;
@@ -15,9 +13,13 @@ namespace WaterTreatmentSCADA.Core.Base
         {
         }
         
+        // Set configuration parameter
         public abstract void SetConfig(string configName, object value);
-        public abstract object GetConfig(string configName);
         
+        // Get configuration parameter value
+        public abstract object? GetConfig(string configName);
+        
+        // Turn device on
         public virtual void TurnOn()
         {
             isRunning = true;
@@ -25,6 +27,7 @@ namespace WaterTreatmentSCADA.Core.Base
             Console.WriteLine($"{Name} turned ON");
         }
         
+        // Turn device off
         public virtual void TurnOff()
         {
             isRunning = false;

@@ -2,9 +2,7 @@ using System;
 
 namespace WaterTreatmentSCADA.Core.Models
 {
-    /// <summary>
-    /// Represents a command to be executed on a device
-    /// </summary>
+    // Command to be executed on a device
     public class DeviceCommand
     {
         public string DeviceName { get; set; }

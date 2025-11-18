@@ -4,9 +4,7 @@ using WaterTreatmentSCADA.Core.Interfaces;
 
 namespace WaterTreatmentSCADA.Core.Utilities
 {
-    /// <summary>
-    /// Binary file I/O implementation for device simulation
-    /// </summary>
+    // File I/O for reading simulation data from CSV files
     public class BinaryIO : IFileSimulator
     {
         public string FilePath { get; private set; }
@@ -25,7 +23,7 @@ namespace WaterTreatmentSCADA.Core.Utilities
                 fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                 reader = new StreamReader(fileStream);
                 
-                // Skip header line if CSV format
+                // Skip header line if CSV file
                 if (filePath.EndsWith(".csv"))
                 {
                     reader.ReadLine();
@@ -37,11 +35,12 @@ namespace WaterTreatmentSCADA.Core.Utilities
             }
         }
         
-        public string ReadLine()
+        // Read one line from file
+        public string? ReadLine()
         {
             if (reader != null && !reader.EndOfStream)
             {
-                string line = reader.ReadLine();
+                string? line = reader.ReadLine();
                 IsEndOfFile = reader.EndOfStream;
                 return line;
             }
@@ -50,6 +49,7 @@ namespace WaterTreatmentSCADA.Core.Utilities
             return null;
         }
         
+        // Write line to file (for logging)
         public void WriteLine(string data)
         {
             using (var logWriter = new StreamWriter(FilePath, true))
@@ -58,6 +58,7 @@ namespace WaterTreatmentSCADA.Core.Utilities
             }
         }
         
+        // Reset file to beginning (for looping simulation)
         public void Reset()
         {
             if (reader != null)
@@ -65,6 +66,7 @@ namespace WaterTreatmentSCADA.Core.Utilities
                 reader.BaseStream.Seek(0, SeekOrigin.Begin);
                 reader.DiscardBufferedData();
                 
+                // Skip header again if CSV
                 if (FilePath.EndsWith(".csv"))
                 {
                     reader.ReadLine();
@@ -74,6 +76,7 @@ namespace WaterTreatmentSCADA.Core.Utilities
             }
         }
         
+        // Cleanup when object destroyed
         ~BinaryIO()
         {
             reader?.Dispose();
