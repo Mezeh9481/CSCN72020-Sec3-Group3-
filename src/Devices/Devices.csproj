@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <RootNamespace>WaterTreatmentSCADA.SystemCore</RootNamespace>
+    <RootNamespace>WaterTreatmentSCADA.Devices</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
-    <ProjectReference Include="..\Devices\Devices.csproj" />
   </ItemGroup>
 
 </Project>
+

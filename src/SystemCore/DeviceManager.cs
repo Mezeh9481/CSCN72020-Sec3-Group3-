@@ -4,9 +4,7 @@ using WaterTreatmentSCADA.Core.Interfaces;
 
 namespace WaterTreatmentSCADA.SystemCore
 {
-    /// <summary>
-    /// Central manager for all devices
-    /// </summary>
+    // Manages all devices - initializes, starts, stops, and updates them
     public class DeviceManager
     {
         private IDeviceRepository repository;

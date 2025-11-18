@@ -5,9 +5,7 @@ using WaterTreatmentSCADA.Core.Interfaces;
 
 namespace WaterTreatmentSCADA.SystemCore
 {
-    /// <summary>
-    /// Repository for managing all devices in the system
-    /// </summary>
+    // Repository for storing and managing all devices
     public class DeviceRepository : IDeviceRepository
     {
         public List<IDevice> Devices { get; private set; }

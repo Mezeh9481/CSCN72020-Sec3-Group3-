@@ -1,32 +1,26 @@
 using System;
 using System.IO;
 
-namespace AquaVisionSCADA.IO
+namespace WaterTreatmentSCADA.SystemCore
 {
-    /// <summary>
-    /// BinaryIO implements the IFileSimulator interface to handle
-    /// reading and writing of simulated device data.
-    /// </summary>
-    public class BinaryIO : IFileSimulator
+    // Simple file I/O for reading simulation data (not currently used - BinaryIO in Core is used instead)
+    public class BinarioIO
     {
         public string FilePath { get; set; }
 
-        public BinaryIO(string filePath)
+        public BinarioIO(string filePath)
         {
             FilePath = filePath;
         }
 
-        /// <summary>
-        /// Reads one line of data from the specified file.
-        /// Returns null if the file does not exist or cannot be read.
-        /// </summary>
-        public string ReadLine()
+        // Read one line from file (returns null on error)
+        public string? ReadLine()
         {
             try
             {
                 using (StreamReader reader = new StreamReader(FilePath))
                 {
-                    string line = reader.ReadLine();
+                    string? line = reader.ReadLine();
                     return line;
                 }
             }
@@ -37,10 +31,7 @@ namespace AquaVisionSCADA.IO
             }
         }
 
-        /// <summary>
-        /// Writes a single line of data to the specified file.
-        /// If the file does not exist, it will be created.
-        /// </summary>
+        // Write one line to file
         public void WriteLine(string data)
         {
             try
