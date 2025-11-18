@@ -1,0 +1,47 @@
+<Window x:Class="WaterTreatmentSCADA.GUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:panels="clr-namespace:WaterTreatmentSCADA.GUI.Panels"
+        Title="Water Treatment Plant SCADA System - Sprint 2" 
+        Height="800" Width="1200"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#2C3E50" Padding="15" Margin="0,0,0,10">
+            <TextBlock Text="Water Treatment Plant SCADA/HMI System" 
+                      FontSize="24" 
+                      FontWeight="Bold" 
+                      Foreground="White"/>
+        </Border>
+        
+        <!-- Main Content Area -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            
+            <!-- pH Monitoring Panel -->
+            <panels:PHMonitoringPanel x:Name="PhMonitoringPanel" 
+                                      Grid.Column="0" 
+                                      Margin="5"/>
+            
+            <!-- Intake Pump Panel -->
+            <panels:IntakePumpPanel x:Name="IntakePumpPanel" 
+                                    Grid.Column="1" 
+                                    Margin="5"/>
+            
+            <!-- Filtration Sensor Panel -->
+            <panels:FiltrationSensorPanel x:Name="FiltrationSensorPanel" 
+                                          Grid.Column="2" 
+                                          Margin="5"/>
+        </Grid>
+    </Grid>
+</Window>
+
