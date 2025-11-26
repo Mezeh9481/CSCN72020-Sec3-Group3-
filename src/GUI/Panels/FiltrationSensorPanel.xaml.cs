@@ -66,7 +66,7 @@ namespace WaterTreatmentSCADA.GUI.Panels
         // Update turbidity display with color coding
         private void UpdateTurbidityDisplay(double turbidity)
         {
-            TurbidityValueText.Text = turbidity.ToString("F2");
+            TurbidityValueText.Text = turbidity.ToString("F2") + " NTU";
             StatusText.Text = $"Turbidity: {turbidity:F2} NTU";
 
             // Color code: green < 3, yellow 3-5, red > 5

@@ -12,6 +12,8 @@ namespace WaterTreatmentSCADA.SystemCore
     public class SystemController
     {
         // System-wide constants
+        public const double MinStorage = 0.0;
+        public const double MaxStorage = 1000.0;
         public const double LowerSafePH = 6.5;
         public const double UpperSafePH = 8.5;
         public const double MinPH = 5.0;
@@ -28,6 +30,7 @@ namespace WaterTreatmentSCADA.SystemCore
         public const int UpdateIntervalMs = 1000;
 
         // Device instances
+        private StorageSensor? storageSensor;
         private pHSensor? phSensor;
         private FiltrationSensor? filtrationSensor;
         private IntakePump? intakePump;
@@ -36,6 +39,7 @@ namespace WaterTreatmentSCADA.SystemCore
         private DeviceManager? deviceManager;
 
         // Events for GUI updates
+        public event EventHandler<double>? OnStorageReadingChanged;
         public event EventHandler<double>? OnPHReadingChanged;
         public event EventHandler<bool>? OnChemicalDoserStateChanged;
         public event EventHandler<bool>? OnIntakePumpStateChanged;
@@ -46,6 +50,7 @@ namespace WaterTreatmentSCADA.SystemCore
         public event EventHandler<SystemEvent>? OnSystemEvent;
 
         // Public access to devices
+        public StorageSensor? StorageSensor => storageSensor;
         public pHSensor? PHSensor => phSensor;
         public FiltrationSensor? FiltrationSensor => filtrationSensor;
         public IntakePump? IntakePump => intakePump;
@@ -61,11 +66,16 @@ namespace WaterTreatmentSCADA.SystemCore
                 LogEvent("SystemController", "Initializing system...", SystemEventType.Info);
 
                 deviceRepository = new DeviceRepository();
-
                 // Create sensors
                 phSensor = new pHSensor(
                     "Main pH Sensor",
                     Path.Combine(simulationDataPath, "pHSensor_simulation.csv")
+                );
+
+                storageSensor = new StorageSensor(
+                    "Storage Sensor",
+                    Path.Combine(simulationDataPath, "WaterStorageSensor_simulation.csv")
+                    
                 );
 
                 filtrationSensor = new FiltrationSensor(
@@ -97,6 +107,8 @@ namespace WaterTreatmentSCADA.SystemCore
                     deviceRepository.AddDevice(intakePump);
                 if (chemicalDoser != null)
                     deviceRepository.AddDevice(chemicalDoser);
+                if (storageSensor != null)
+                    deviceRepository.AddDevice(storageSensor);
 
                 // Setup device manager
                 deviceManager = new DeviceManager(deviceRepository);
@@ -117,6 +129,7 @@ namespace WaterTreatmentSCADA.SystemCore
         // Subscribe to all device events so we can broadcast to GUI
         private void SubscribeToDeviceEvents()
         {
+            
             // Subscribe to pH sensor events
             if (phSensor != null)
             {
@@ -143,7 +156,10 @@ namespace WaterTreatmentSCADA.SystemCore
                 filtrationSensor.OnThresholdAlert += OnFiltrationAlertInternal;
                 filtrationSensor.OnThresholdCleared += OnFiltrationAlertClearedInternal;
             }
-
+            if (storageSensor != null)
+            {
+                storageSensor.OnReadingChange += OnStorageReadingChangedInternal;
+            }
             LogEvent("EventSubscription", "All device events subscribed", SystemEventType.Info);
         }
 
@@ -165,6 +181,25 @@ namespace WaterTreatmentSCADA.SystemCore
             // Broadcast to GUI
             OnPHReadingChanged?.Invoke(this, phValue);
         }
+        private void OnStorageReadingChangedInternal(object? sender, double storageValue)
+        {
+            Console.WriteLine("Storage event");
+            LogEvent("Capacity", $"storage reading changed: {storageValue:F2}", SystemEventType.DataUpdate);
+
+            // Check if pH is out of safe range
+            bool isSafe = storageValue >= MinStorage && storageValue <= MaxStorage;
+            if (!isSafe)
+            {
+                LogEvent("Capacity", $"⚠️ Storage exceeds capacity: {storageValue:F2} (Maximum Capacity: {MaxStorage})", SystemEventType.Warning);
+            }
+
+            // Chemical doser handles activation automatically (already linked to pH sensor)
+            // This method can add more automatic actions if needed
+
+        // Broadcast to GUI
+        OnStorageReadingChanged?.Invoke(this, storageValue);
+        }
+
 
         private void OnChemicalDoserStateChangedInternal(object? sender, bool isActive)
         {
@@ -292,6 +327,11 @@ namespace WaterTreatmentSCADA.SystemCore
 
         private void UnsubscribeFromDeviceEvents()
         {
+            if (storageSensor != null)
+            {
+                storageSensor.OnReadingChange -= OnStorageReadingChangedInternal;
+            }
+
             if (phSensor != null)
             {
                 phSensor.OnReadingChange -= OnPHSensorReadingChanged;
@@ -346,6 +386,11 @@ namespace WaterTreatmentSCADA.SystemCore
             if (phSensor != null)
             {
                 telemetry["pHReading"] = phSensor.CurrentReading;
+            }
+
+            if (storageSensor != null)
+            {
+                telemetry["storageLevel"] = storageSensor.CurrentReading;
             }
 
             if (filtrationSensor != null)

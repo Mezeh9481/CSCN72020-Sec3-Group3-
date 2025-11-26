@@ -1,7 +1,10 @@
 using System;
 using System.IO;
 using System.Windows;
+using WaterTreatmentSCADA.GUI.Panels;
 using WaterTreatmentSCADA.SystemCore;
+
+
 
 namespace WaterTreatmentSCADA.GUI
 {
@@ -30,11 +33,14 @@ namespace WaterTreatmentSCADA.GUI
                 systemController = new SystemController();
                 systemController.Initialize(dataPath);
 
-                // Initialize panels with devices from controller
-                PhMonitoringPanel.Initialize(systemController.PHSensor!, systemController.ChemicalDoser!);
-                IntakePumpPanel.Initialize(systemController.IntakePump!);
-                FiltrationSensorPanel.Initialize(systemController.FiltrationSensor!);
 
+                // Initialize with devices
+                waterStoragePanel.Initialize(systemController.StorageSensor!);
+                phMonitoringPanel.Initialize(systemController.PHSensor!, systemController.ChemicalDoser!);
+                intakePumpPanel.Initialize(systemController.IntakePump!);
+                filtrationSensorPanel.Initialize(systemController.FiltrationSensor!);
+                
+  
                 // Subscribe to system events (for logging/debugging)
                 if (systemController != null)
                 {

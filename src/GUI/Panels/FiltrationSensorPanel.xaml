@@ -39,17 +39,11 @@
                        Padding="20,15">
                     <Grid>
                         <TextBlock x:Name="TurbidityValueText" 
-                                  Text="0.0" 
+                                  Text="0.0 NTU" 
                                   FontSize="48" 
                                   FontWeight="Bold" 
                                   Foreground="White" 
                                   HorizontalAlignment="Center"/>
-                        <TextBlock Text="NTU" 
-                                  FontSize="18" 
-                                  Foreground="White" 
-                                  HorizontalAlignment="Center" 
-                                  VerticalAlignment="Bottom" 
-                                  Margin="0,0,0,5"/>
                     </Grid>
                 </Border>
             </Grid>
