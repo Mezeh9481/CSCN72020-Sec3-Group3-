@@ -35,6 +35,7 @@ namespace WaterTreatmentSCADA.GUI
 
 
                 // Initialize with devices
+                pressureMonitoringPanel.Initialize(systemController.PressureSensor!);
                 tempMonitoringPanel.Initialize(systemController.TempSensor!); 
                 waterStoragePanel.Initialize(systemController.StorageSensor!);
                 phMonitoringPanel.Initialize(systemController.PHSensor!, systemController.ChemicalDoser!);

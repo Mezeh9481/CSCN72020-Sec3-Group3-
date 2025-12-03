@@ -33,6 +33,7 @@ namespace WaterTreatmentSCADA.SystemCore
         public const int UpdateIntervalMs = 1000;
 
         // Device instances
+        private PressureSensor? pressureSensor;
         private TempSensor? tempSensor;
         private StorageSensor? storageSensor;
         private pHSensor? phSensor;
@@ -44,6 +45,7 @@ namespace WaterTreatmentSCADA.SystemCore
        
 
         // Events for GUI updates
+        public event EventHandler<double>? OnPressureReadingChanged;
         public event EventHandler<double>? OnTempReadingChanged;
         public event EventHandler<double>? OnStorageReadingChanged;
         public event EventHandler<double>? OnPHReadingChanged;
@@ -55,7 +57,8 @@ namespace WaterTreatmentSCADA.SystemCore
         public event EventHandler<double>? OnFiltrationAlertCleared;
         public event EventHandler<SystemEvent>? OnSystemEvent;
 
-        // Public access to devices
+        // Public access to devices 
+        public PressureSensor? PressureSensor => pressureSensor;
         public TempSensor? TempSensor => tempSensor;
         public StorageSensor? StorageSensor => storageSensor;
         public pHSensor? PHSensor => phSensor;
@@ -74,6 +77,11 @@ namespace WaterTreatmentSCADA.SystemCore
 
                 deviceRepository = new DeviceRepository();
                 // Create sensors
+                pressureSensor = new PressureSensor(
+                    "Main Pressure Sensor",
+                    Path.Combine(simulationDataPath, "PressureGauge_simulation.csv")
+                );
+                
                 tempSensor = new TempSensor(
                     "Main Temp Sensor",
                     Path.Combine(simulationDataPath, "TemperatureSensor_simulation.csv")
@@ -110,6 +118,8 @@ namespace WaterTreatmentSCADA.SystemCore
                 }
 
                 // Register all devices
+                if (pressureSensor != null)
+                    deviceRepository.AddDevice(pressureSensor);
                 if (tempSensor != null)
                     deviceRepository.AddDevice(tempSensor);
                 if (phSensor != null)
@@ -142,6 +152,11 @@ namespace WaterTreatmentSCADA.SystemCore
         // Subscribe to all device events so we can broadcast to GUI
         private void SubscribeToDeviceEvents()
         {
+            // Subscribe to pressure sensor events
+            if (pressureSensor != null)
+            {
+                pressureSensor.OnReadingChange += OnPressureReadingChangedInternal;
+            }
             //Subscribe to temp sensor events
                if (tempSensor != null)
             {
@@ -181,11 +196,31 @@ namespace WaterTreatmentSCADA.SystemCore
         }
 
         // Event handlers - receive events from devices and broadcast to GUI
+        private void OnPressureReadingChangedInternal(object? sender, double pressureValue)
+        {
+            LogEvent("PressureSensor", $"Pressure reading changed: {pressureValue:F2} bar", SystemEventType.DataUpdate);
+
+            // Check if pressure is out of safe range
+            if (pressureValue < PressureSensor.MinSafePressure)
+            {
+            LogEvent("PressureSensor", $"🚨 CRITICAL LOW PRESSURE: {pressureValue:F2} bar (min safe: {PressureSensor.MinSafePressure} bar)", SystemEventType.Alert);
+            }
+            else if (pressureValue >= PressureSensor.CriticalPressure)
+            {
+            LogEvent("PressureSensor", $"🚨 CRITICAL HIGH PRESSURE: {pressureValue:F2} bar (threshold: {PressureSensor.CriticalPressure} bar)", SystemEventType.Alert);
+            }
+            else if (pressureValue > PressureSensor.NormalPressureHigh && pressureValue < PressureSensor.CriticalPressure)
+            {
+            LogEvent("PressureSensor", $"⚠️ ELEVATED PRESSURE: {pressureValue:F2} bar (normal max: {PressureSensor.NormalPressureHigh} bar)", SystemEventType.Warning);
+            }
+            // Broadcast to GUI
+            OnPressureReadingChanged?.Invoke(this, pressureValue);
+        }
          private void OnTempSensorReadingChanged(object? sender, double tempValue)
         {
             LogEvent("tempSensor", $"temp reading changed: {tempValue:F2}", SystemEventType.DataUpdate);
 
-            // Check if pH is out of safe range
+            // Check if temp is out of safe range
             bool isSafe = tempValue <= MinTemp;
             if (!isSafe)
             {
@@ -361,6 +396,10 @@ namespace WaterTreatmentSCADA.SystemCore
 
         private void UnsubscribeFromDeviceEvents()
         {
+            if (pressureSensor != null)
+            {
+                pressureSensor.OnReadingChange -= OnPressureReadingChangedInternal;
+            }
             if (tempSensor != null)
             {
                 tempSensor.OnReadingChange -= OnTempSensorReadingChanged;
@@ -421,6 +460,11 @@ namespace WaterTreatmentSCADA.SystemCore
                 { "isRunning", IsRunning },
                 { "timestamp", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") }
             };
+            if (pressureSensor != null)
+            {
+                telemetry["pressure"] = pressureSensor.CurrentReading;
+                telemetry["pressureStatus"] = pressureSensor.GetPressureStatusDescription();
+            }
             if (tempSensor != null)
             {
                 telemetry["temp"] = tempSensor.CurrentReading;
