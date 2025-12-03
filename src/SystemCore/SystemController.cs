@@ -18,6 +18,9 @@ namespace WaterTreatmentSCADA.SystemCore
         public const double UpperSafePH = 8.5;
         public const double MinPH = 5.0;
         public const double MaxPH = 9.0;
+        private const double MinTemp = 22.0;
+        private const double WarningTemp = 23.0;
+
 
         public const double GreenTurbidityThreshold = 3.0;  // < 3 NTU = safe
         public const double YellowTurbidityThreshold = 5.0; // 3-5 NTU = warning
@@ -30,6 +33,7 @@ namespace WaterTreatmentSCADA.SystemCore
         public const int UpdateIntervalMs = 1000;
 
         // Device instances
+        private TempSensor? tempSensor;
         private StorageSensor? storageSensor;
         private pHSensor? phSensor;
         private FiltrationSensor? filtrationSensor;
@@ -37,8 +41,10 @@ namespace WaterTreatmentSCADA.SystemCore
         private ChemicalDoser? chemicalDoser;
         private DeviceRepository? deviceRepository;
         private DeviceManager? deviceManager;
+       
 
         // Events for GUI updates
+        public event EventHandler<double>? OnTempReadingChanged;
         public event EventHandler<double>? OnStorageReadingChanged;
         public event EventHandler<double>? OnPHReadingChanged;
         public event EventHandler<bool>? OnChemicalDoserStateChanged;
@@ -50,6 +56,7 @@ namespace WaterTreatmentSCADA.SystemCore
         public event EventHandler<SystemEvent>? OnSystemEvent;
 
         // Public access to devices
+        public TempSensor? TempSensor => tempSensor;
         public StorageSensor? StorageSensor => storageSensor;
         public pHSensor? PHSensor => phSensor;
         public FiltrationSensor? FiltrationSensor => filtrationSensor;
@@ -67,6 +74,10 @@ namespace WaterTreatmentSCADA.SystemCore
 
                 deviceRepository = new DeviceRepository();
                 // Create sensors
+                tempSensor = new TempSensor(
+                    "Main Temp Sensor",
+                    Path.Combine(simulationDataPath, "TemperatureSensor_simulation.csv")
+                );
                 phSensor = new pHSensor(
                     "Main pH Sensor",
                     Path.Combine(simulationDataPath, "pHSensor_simulation.csv")
@@ -99,6 +110,8 @@ namespace WaterTreatmentSCADA.SystemCore
                 }
 
                 // Register all devices
+                if (tempSensor != null)
+                    deviceRepository.AddDevice(tempSensor);
                 if (phSensor != null)
                     deviceRepository.AddDevice(phSensor);
                 if (filtrationSensor != null)
@@ -129,7 +142,11 @@ namespace WaterTreatmentSCADA.SystemCore
         // Subscribe to all device events so we can broadcast to GUI
         private void SubscribeToDeviceEvents()
         {
-            
+            //Subscribe to temp sensor events
+               if (tempSensor != null)
+            {
+                tempSensor.OnReadingChange += OnTempSensorReadingChanged;
+            }
             // Subscribe to pH sensor events
             if (phSensor != null)
             {
@@ -164,6 +181,23 @@ namespace WaterTreatmentSCADA.SystemCore
         }
 
         // Event handlers - receive events from devices and broadcast to GUI
+         private void OnTempSensorReadingChanged(object? sender, double tempValue)
+        {
+            LogEvent("tempSensor", $"temp reading changed: {tempValue:F2}", SystemEventType.DataUpdate);
+
+            // Check if pH is out of safe range
+            bool isSafe = tempValue <= MinTemp;
+            if (!isSafe)
+            {
+                LogEvent("tempSensor", $"⚠️ temp TOO HIGH: {tempValue:F2} (safe range: <{MinTemp})", SystemEventType.Warning);
+            }
+
+            // Chemical doser handles activation automatically (already linked to pH sensor)
+            // This method can add more automatic actions if needed
+
+            // Broadcast to GUI
+            OnTempReadingChanged?.Invoke(this, tempValue);
+        }
         private void OnPHSensorReadingChanged(object? sender, double phValue)
         {
             LogEvent("pHSensor", $"pH reading changed: {phValue:F2}", SystemEventType.DataUpdate);
@@ -327,6 +361,11 @@ namespace WaterTreatmentSCADA.SystemCore
 
         private void UnsubscribeFromDeviceEvents()
         {
+            if (tempSensor != null)
+            {
+                tempSensor.OnReadingChange -= OnTempSensorReadingChanged;
+            }
+
             if (storageSensor != null)
             {
                 storageSensor.OnReadingChange -= OnStorageReadingChangedInternal;
@@ -382,6 +421,10 @@ namespace WaterTreatmentSCADA.SystemCore
                 { "isRunning", IsRunning },
                 { "timestamp", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") }
             };
+            if (tempSensor != null)
+            {
+                telemetry["temp"] = tempSensor.CurrentReading;
+            }
 
             if (phSensor != null)
             {

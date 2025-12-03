@@ -40,6 +40,9 @@
                     <panels:PHMonitoringPanel x:Name="phMonitoringPanel"
                                             Margin="0,0,0,20"/>
 
+                    <panels:TempMonitoringPanel x:Name="tempMonitoringPanel"
+                                            Margin="0,0,0,20"/>                       
+
                     <panels:FiltrationSensorPanel x:Name="filtrationSensorPanel"
                                                 Margin="0,0,0,20"/>
 
