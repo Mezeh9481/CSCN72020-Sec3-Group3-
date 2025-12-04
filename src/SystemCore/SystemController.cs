@@ -39,6 +39,7 @@ namespace WaterTreatmentSCADA.SystemCore
         private pHSensor? phSensor;
         private FiltrationSensor? filtrationSensor;
         private IntakePump? intakePump;
+        private ChlorinePump? chlorinePump;
         private ChemicalDoser? chemicalDoser;
         private DeviceRepository? deviceRepository;
         private DeviceManager? deviceManager;
@@ -52,6 +53,9 @@ namespace WaterTreatmentSCADA.SystemCore
         public event EventHandler<bool>? OnChemicalDoserStateChanged;
         public event EventHandler<bool>? OnIntakePumpStateChanged;
         public event EventHandler<double>? OnIntakePumpFlowRateChanged;
+        public event EventHandler<bool>? OnChlorinePumpStateChanged;
+        public event EventHandler<double>? OnChlorinePumpDosingRateChanged;
+        public event EventHandler<double>? OnChlorinePumpChlorineLevelChanged;
         public event EventHandler<double>? OnFiltrationTurbidityChanged;
         public event EventHandler<double>? OnFiltrationAlert;
         public event EventHandler<double>? OnFiltrationAlertCleared;
@@ -64,6 +68,7 @@ namespace WaterTreatmentSCADA.SystemCore
         public pHSensor? PHSensor => phSensor;
         public FiltrationSensor? FiltrationSensor => filtrationSensor;
         public IntakePump? IntakePump => intakePump;
+        public ChlorinePump? ChlorinePump => chlorinePump;
         public ChemicalDoser? ChemicalDoser => chemicalDoser;
         public DeviceManager? DeviceManager => deviceManager;
         public bool IsRunning { get; private set; }
@@ -108,7 +113,10 @@ namespace WaterTreatmentSCADA.SystemCore
                     "Main Intake Pump",
                     Path.Combine(simulationDataPath, "IntakePump_simulation.csv")
                 );
-
+                chlorinePump = new ChlorinePump(
+                    "Chlorine Dosing Pump",
+                    Path.Combine(simulationDataPath, "ChlorinePumpDevice_simulation.csv")
+                );
                 chemicalDoser = new ChemicalDoser("Chemical Doser");
 
                 // Link chemical doser to pH sensor for automatic activation
@@ -128,6 +136,8 @@ namespace WaterTreatmentSCADA.SystemCore
                     deviceRepository.AddDevice(filtrationSensor);
                 if (intakePump != null)
                     deviceRepository.AddDevice(intakePump);
+                if (chlorinePump != null)
+                    deviceRepository.AddDevice(chlorinePump);
                 if (chemicalDoser != null)
                     deviceRepository.AddDevice(chemicalDoser);
                 if (storageSensor != null)
@@ -180,7 +190,13 @@ namespace WaterTreatmentSCADA.SystemCore
                 intakePump.OnStateChange += OnIntakePumpStateChangedInternal;
                 intakePump.OnFlowRateChange += OnIntakePumpFlowRateChangedInternal;
             }
-
+            // Subscribe to chlorine pump events
+            if (chlorinePump != null)
+            {
+                chlorinePump.OnStateChange += OnChlorinePumpStateChangedInternal;
+                chlorinePump.OnDosingRateChange += OnChlorinePumpDosingRateChangedInternal;
+                chlorinePump.OnChlorineLevelChange += OnChlorinePumpChlorineLevelChangedInternal;
+            }
             // Subscribe to filtration sensor events
             if (filtrationSensor != null)
             {
@@ -311,6 +327,34 @@ namespace WaterTreatmentSCADA.SystemCore
             LogEvent("FiltrationSensor", $"✅ ALERT CLEARED: Turbidity back to normal. Value: {turbidity:F2} NTU", SystemEventType.Info);
             OnFiltrationAlertCleared?.Invoke(this, turbidity);
         }
+        private void OnChlorinePumpStateChangedInternal(object? sender, bool isOn)
+        {
+            LogEvent("ChlorinePump", $"State changed: {(isOn ? "ON" : "OFF")}", SystemEventType.StateChange);
+            OnChlorinePumpStateChanged?.Invoke(this, isOn);
+        }
+
+        private void OnChlorinePumpDosingRateChangedInternal(object? sender, double dosingRate)
+        {
+            LogEvent("ChlorinePump", $"Dosing rate changed: {dosingRate:F1}%", SystemEventType.DataUpdate);
+            OnChlorinePumpDosingRateChanged?.Invoke(this, dosingRate);
+        }
+
+        private void OnChlorinePumpChlorineLevelChangedInternal(object? sender, double chlorineLevel)
+        {
+            LogEvent("ChlorinePump", $"Chlorine level changed: {chlorineLevel:F2} ppm", SystemEventType.DataUpdate);
+    
+        // Check for critical chlorine levels
+        if (chlorineLevel < 1.5)
+        {
+        LogEvent("ChlorinePump", $"⚠️ LOW CHLORINE LEVEL: {chlorineLevel:F2} ppm", SystemEventType.Warning);
+        }
+        else if (chlorineLevel > 3.0)
+        {
+        LogEvent("ChlorinePump", $"⚠️ HIGH CHLORINE LEVEL: {chlorineLevel:F2} ppm", SystemEventType.Warning);
+        }
+    
+        OnChlorinePumpChlorineLevelChanged?.Invoke(this, chlorineLevel);
+        }
 
         // Control methods for user actions
         public void TurnOnIntakePump()
@@ -347,7 +391,40 @@ namespace WaterTreatmentSCADA.SystemCore
                 }
             }
         }
+        public void TurnOnChlorinePump()
+        {
+            if (chlorinePump != null)
+            {
+                chlorinePump.TurnOn();
+                LogEvent("UserAction", "Chlorine pump turned ON", SystemEventType.UserAction);
+            }
+        }
 
+        public void TurnOffChlorinePump()
+        {
+            if (chlorinePump != null)
+            {
+            chlorinePump.TurnOff();
+                LogEvent("UserAction", "Chlorine pump turned OFF", SystemEventType.UserAction);
+            }
+        }
+
+        public void SetChlorinePumpDosingRate(double dosingRate)
+{
+            if (chlorinePump != null)
+    {
+            try
+        {
+            chlorinePump.SetDosingRate(dosingRate);
+            LogEvent("UserAction", $"Chlorine pump dosing rate set to {dosingRate:F1}%", SystemEventType.UserAction);
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            LogEvent("UserAction", $"Error setting dosing rate: {ex.Message}", SystemEventType.Error);
+            throw;
+        }
+    }
+}
         public void ActivateChemicalDoser()
         {
             if (chemicalDoser != null)
@@ -425,6 +502,12 @@ namespace WaterTreatmentSCADA.SystemCore
                 intakePump.OnStateChange -= OnIntakePumpStateChangedInternal;
                 intakePump.OnFlowRateChange -= OnIntakePumpFlowRateChangedInternal;
             }
+            if (chlorinePump != null)
+            {
+                chlorinePump.OnStateChange -= OnChlorinePumpStateChangedInternal;
+                chlorinePump.OnDosingRateChange -= OnChlorinePumpDosingRateChangedInternal;
+                chlorinePump.OnChlorineLevelChange -= OnChlorinePumpChlorineLevelChangedInternal;
+            }
 
             if (filtrationSensor != null)
             {
@@ -491,6 +574,12 @@ namespace WaterTreatmentSCADA.SystemCore
                 telemetry["intakePumpOn"] = intakePump.IsOn;
                 telemetry["intakePumpFlowRate"] = intakePump.FlowRate;
             }
+            if (chlorinePump != null)
+            {
+                telemetry["chlorinePumpOn"] = chlorinePump.IsOn;
+                telemetry["chlorinePumpDosingRate"] = chlorinePump.DosingRate;
+                telemetry["chlorineLevel"] = chlorinePump.ChlorineLevel;
+            }
 
             if (chemicalDoser != null)
             {
@@ -523,3 +612,4 @@ namespace WaterTreatmentSCADA.SystemCore
         AutomaticAction
     }
 }
+ 

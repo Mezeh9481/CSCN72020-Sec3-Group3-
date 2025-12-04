@@ -40,6 +40,7 @@ namespace WaterTreatmentSCADA.GUI
                 waterStoragePanel.Initialize(systemController.StorageSensor!);
                 phMonitoringPanel.Initialize(systemController.PHSensor!, systemController.ChemicalDoser!);
                 intakePumpPanel.Initialize(systemController.IntakePump!);
+                chlorinePumpPanel.Initialize(systemController.ChlorinePump!);
                 filtrationSensorPanel.Initialize(systemController.FiltrationSensor!);
                 
   

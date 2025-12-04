@@ -33,13 +33,16 @@
                             VerticalAlignment="Top">
                     <panels:IntakePumpPanel x:Name="intakePumpPanel"
                                             Margin="0,0,0,20"/>
+                                            
+                    <panels:ChlorinePumpPanel x:Name="chlorinePumpPanel"
+                                            Margin="0,0,0,20"/>
 
                     <panels:WaterStoragePanel x:Name="waterStoragePanel"
                                             Margin="0,0,0,20"/>
 
                     <panels:PHMonitoringPanel x:Name="phMonitoringPanel"
                                             Margin="0,0,0,20"/>
-                                            
+
                     <panels:PressureMonitoringPanel x:Name="pressureMonitoringPanel"
                                             Margin="0,0,0,20"/>
 
